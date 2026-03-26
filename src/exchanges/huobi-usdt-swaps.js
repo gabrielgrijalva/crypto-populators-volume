@@ -82,7 +82,7 @@ class HuobiUSDTSwaps extends BaseExchange {
                         bestBidPrice: res.bid ? +res.bid[0] : null,
                         bestAskSize: res.ask ? +res.ask[1] : null,
                         bestBidSize: res.bid ? +res.bid[1] : null,
-                        volume24h: +(+res.vol).toFixed(2),
+                        volume24h: res.vol != null ? +(+res.vol).toFixed(2) : null,
                     },
                 }
             })
