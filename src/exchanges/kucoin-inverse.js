@@ -93,7 +93,7 @@ class KuCoinInverse extends BaseExchange {
             }
 
             const contract = contracts.find(c => c.symbol === symbol);
-            const turnover = contract?.turnoverOf24h;
+            const turnover = contract?.volumeOf24h;
 
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
@@ -136,7 +136,7 @@ class KuCoinInverse extends BaseExchange {
                     .filter(ticker => inverseSymbols.has(ticker.symbol))
                     .map(ticker => {
                         const contract = contracts.find(c => c.symbol === ticker.symbol);
-                        const turnover = contract?.turnoverOf24h;
+                        const turnover = contract?.volumeOf24h;
                         return {
                             symbol: ticker.symbol,
                             ticker: {

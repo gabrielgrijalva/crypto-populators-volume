@@ -79,7 +79,7 @@ class Bybit extends BaseExchange {
         if (response?.result?.list?.length) {
             const ticker = response.result.list[0];
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
-            const volume24h = +(+ticker.turnover24h).toFixed(2);
+            const volume24h = instrument == 'inverse' ? +(+ticker.volume24h).toFixed(2) : +(+ticker.turnover24h).toFixed(2);
             return {
                 symbol,
                 ticker: {
@@ -108,7 +108,7 @@ class Bybit extends BaseExchange {
         if (response?.result?.list?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return response.result.list.map(res => {
-                const volume24h = +(+res.turnover24h).toFixed(2);
+                const volume24h = instrument == 'inverse' ? +(+res.volume24h).toFixed(2) : +(+res.turnover24h).toFixed(2);
                 return {
                     symbol: res.symbol,
                     ticker: {
