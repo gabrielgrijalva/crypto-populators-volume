@@ -83,7 +83,7 @@ class KrakenFutures extends BaseExchange {
                         bestBidPrice: null,
                         bestAskSize: null,
                         bestBidSize: null,
-                        volume24h: ticker.vol24h ? +(+ticker.vol24h).toFixed(2) : null,
+                        volume24h: ticker.volumeQuote != null ? +(+ticker.volumeQuote).toFixed(2) : null,
                     }
                 };
             }
@@ -115,7 +115,7 @@ class KrakenFutures extends BaseExchange {
                             bestBidPrice: null,
                             bestAskSize: null,
                             bestBidSize: null,
-                            volume24h: ticker.vol24h ? +(+ticker.vol24h).toFixed(2) : null,
+                            volume24h: ticker.volumeQuote != null ? +(+ticker.volumeQuote).toFixed(2) : null,
                         },
                     };
                 });
