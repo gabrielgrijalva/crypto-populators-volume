@@ -88,7 +88,8 @@ class CoinexFutures extends BaseExchange {
                     bestBidPrice: +bestBid[0] || +ticker.buy,
                     bestAskSize: +bestAsk[1] || +ticker.sell_amount,
                     bestBidSize: +bestBid[1] || +ticker.buy_amount,
-                    volume24h
+                    volume24h,
+                    openInterest: ticker.open_interest_volume != null && ticker.last ? +(+ticker.open_interest_volume * +ticker.last).toFixed(2) : null
                 }
             };
         }

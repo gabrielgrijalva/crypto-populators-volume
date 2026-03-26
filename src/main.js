@@ -9,6 +9,7 @@ const {
     tableExists,
     createTable,
     insertVolumeData,
+    insertOpenInterestData,
     deleteOldData
 } = require('./utils/db');
 const {
@@ -190,7 +191,7 @@ function getTableName(apiName, tablePrefix, type, tableType, symbol, tableSymbol
     symbol = tableSymbol || symbol;
 
     const parsedType = parseInstrumentType(type);
-    // tableType will be 'volume_24h'
+    // tableType will be 'volume_24h' or 'open_interest'
     const constructedName = `${prefix}_${parsedType}_${tableType}_${symbol}`;
 
     if (constructedName.length > 64) {
@@ -218,11 +219,21 @@ async function ensureTablesExist() {
                             instrument.table_symbol
                         );
                         await ensureTableExists(volumeTableName, 'volume_24h');
+
+                        const oiTableName = getTableName(
+                            exchange.api_name,
+                            exchange.table_prefix,
+                            instrument.type,
+                            'open_interest',
+                            instrument.symbol,
+                            instrument.table_symbol
+                        );
+                        await ensureTableExists(oiTableName, 'open_interest');
                     }
                 }
             }
         }
-        logWithTimestamp('All volume tables exist.');
+        logWithTimestamp('All volume and open interest tables exist.');
     } catch (error) {
         handleError(error, true);
     }
@@ -401,6 +412,26 @@ async function initializeExchangeProcesses(exchangeSettings) {
                                         logWithTimestamp(`Error inserting volume data for ${tickerInfo.symbol}: ${error.message}`);
                                     }
                                 }
+
+                                // Insert open interest data if available
+                                if ('ticker' in tickerInfo && tickerInfo.ticker && tickerInfo.ticker.openInterest != null) {
+                                    const oiTableName = getTableName(
+                                        exchangeSettings.api_name,
+                                        exchangeSettings.table_prefix,
+                                        symbolDetails.type,
+                                        'open_interest',
+                                        tickerInfo.symbol,
+                                        symbolDetails.table_symbol
+                                    );
+                                    try {
+                                        await insertOpenInterestData(oiTableName, [{
+                                            timestamp: tickerInfo.ticker.timestamp,
+                                            openInterest: tickerInfo.ticker.openInterest
+                                        }]);
+                                    } catch (error) {
+                                        logWithTimestamp(`Error inserting open interest data for ${tickerInfo.symbol}: ${error.message}`);
+                                    }
+                                }
                             }
                         }
                     } catch (error) {
@@ -439,7 +470,7 @@ async function start() {
         }
 
         await ensureTablesExist();
-        logWithTimestamp('Confirmed that all volume tables exist.');
+        logWithTimestamp('Confirmed that all tables exist.');
 
         for (const exchangeSettings of settings.exchanges) {
             await initializeExchangeProcesses(exchangeSettings);
@@ -489,7 +520,7 @@ async function dailyUpdateAndCheck() {
         logWithTimestamp('Deletion of old data initiated.');
 
         await ensureTablesExist();
-        logWithTimestamp('Confirmed that all volume tables exist.');
+        logWithTimestamp('Confirmed that all tables exist.');
 
         logWithTimestamp('New settings have been reloaded.');
 

@@ -15,6 +15,29 @@ class HuobiCoinSwaps extends BaseExchange {
             fetchTicker: true,
             fetchAllTickers: true,
         }
+        this._oiCache = null;
+        this._oiCacheTime = 0;
+        this._oiCacheTTL = 60000; // 1 minute cache
+    }
+
+    async _getOpenInterestCache() {
+        const now = Date.now();
+        if (this._oiCache && (now - this._oiCacheTime) < this._oiCacheTTL) {
+            return this._oiCache;
+        }
+        try {
+            const response = await this.publicRequest('swap-api/v1/swap_open_interest', {});
+            if (response?.status === 'ok' && response?.data?.length) {
+                this._oiCache = {};
+                for (const item of response.data) {
+                    this._oiCache[item.contract_code] = +item.amount;
+                }
+                this._oiCacheTime = now;
+            }
+        } catch (error) {
+            console.error('Error fetching open interest from Huobi Coin Swaps:', error);
+        }
+        return this._oiCache || {};
     }
 
     // Exchange info functions
@@ -43,6 +66,8 @@ class HuobiCoinSwaps extends BaseExchange {
             contract_code: symbol
         })
         if (response?.status === 'ok') {
+            const oiCache = await this._getOpenInterestCache();
+            const oiAmount = oiCache[symbol];
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
                 symbol,
@@ -57,6 +82,7 @@ class HuobiCoinSwaps extends BaseExchange {
                     bestAskSize: response.tick.ask ?  +response.tick.ask[1] : null,
                     bestBidSize: response.tick.bid ?  +response.tick.bid[1] : null,
                     volume24h: +(+response.tick.amount * +response.tick.close).toFixed(2),
+                    openInterest: oiAmount != null && response.tick.close ? +(oiAmount * +response.tick.close).toFixed(2) : null,
                 }
             }
         }
@@ -66,11 +92,14 @@ class HuobiCoinSwaps extends BaseExchange {
     // Batch market data functions
 
     async fetchAllTickers(instrument) {
-        const response = await this.publicRequest('v2/swap-ex/market/detail/batch_merged', {
-        })
+        const [response, oiCache] = await Promise.all([
+            this.publicRequest('v2/swap-ex/market/detail/batch_merged', {}),
+            this._getOpenInterestCache(),
+        ]);
         if (response?.status === 'ok' && response?.ticks?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return response.ticks.map(res => {
+                const oiAmount = oiCache[res.contract_code];
                 return {
                     symbol: res.contract_code,
                     ticker: {
@@ -84,6 +113,7 @@ class HuobiCoinSwaps extends BaseExchange {
                         bestAskSize: res.ask ? +res.ask[1] : null,
                         bestBidSize: res.bid ? +res.bid[1] : null,
                         volume24h: +(+res.amount * +res.close).toFixed(2),
+                        openInterest: oiAmount != null && res.close ? +(oiAmount * +res.close).toFixed(2) : null,
                     },
                 }
             })

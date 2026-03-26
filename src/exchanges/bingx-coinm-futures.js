@@ -50,12 +50,20 @@ class BingXCoinMFutures extends BaseExchange {
     async fetchTicker(symbol, instrument) {
         try {
             const timestamp = Date.now();
-            const response = await axios.get(`${this.url}/openApi/cswap/v1/market/ticker`, {
-                params: { symbol, timestamp }
-            });
+            const [response, oiResponse] = await Promise.all([
+                axios.get(`${this.url}/openApi/cswap/v1/market/ticker`, {
+                    params: { symbol, timestamp }
+                }),
+                axios.get(`${this.url}/openApi/cswap/v1/market/openInterest`, {
+                    params: { symbol, timestamp }
+                }).catch(() => null)
+            ]);
 
             if (response?.data?.data) {
                 const data = response.data.data;
+                const lastPrice = data.lastPrice ? +data.lastPrice : null;
+                const oiBase = oiResponse?.data?.data?.[0]?.openInterest;
+                const openInterest = oiBase && lastPrice ? +(+oiBase * lastPrice).toFixed(2) : null;
                 const ts = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
                 return {
                     symbol,
@@ -64,12 +72,13 @@ class BingXCoinMFutures extends BaseExchange {
                         open: null,
                         high: null,
                         low: null,
-                        close: data.lastPrice ? +data.lastPrice : null,
+                        close: lastPrice,
                         bestAskPrice: null,
                         bestBidPrice: null,
                         bestAskSize: null,
                         bestBidSize: null,
-                        volume24h: data.quoteVolume && data.lastPrice ? +(+data.quoteVolume * +data.lastPrice).toFixed(2) : null,
+                        volume24h: data.quoteVolume && lastPrice ? +(+data.quoteVolume * lastPrice).toFixed(2) : null,
+                        openInterest,
                     }
                 };
             }
@@ -91,7 +100,21 @@ class BingXCoinMFutures extends BaseExchange {
 
             if (response?.data?.data?.length) {
                 const ts = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
-                return response.data.data.map(data => {
+
+                // Fetch OI for each symbol in parallel
+                const oiResults = await Promise.allSettled(
+                    response.data.data.map(data =>
+                        axios.get(`${this.url}/openApi/cswap/v1/market/openInterest`, {
+                            params: { symbol: data.symbol, timestamp: Date.now() }
+                        }).catch(() => null)
+                    )
+                );
+
+                return response.data.data.map((data, i) => {
+                    const lastPrice = data.lastPrice ? +data.lastPrice : null;
+                    const oiRes = oiResults[i]?.status === 'fulfilled' ? oiResults[i].value : null;
+                    const oiBase = oiRes?.data?.data?.[0]?.openInterest;
+                    const openInterest = oiBase && lastPrice ? +(+oiBase * lastPrice).toFixed(2) : null;
                     return {
                         symbol: data.symbol,
                         ticker: {
@@ -99,12 +122,13 @@ class BingXCoinMFutures extends BaseExchange {
                             open: null,
                             high: null,
                             low: null,
-                            close: data.lastPrice ? +data.lastPrice : null,
+                            close: lastPrice,
                             bestAskPrice: null,
                             bestBidPrice: null,
                             bestAskSize: null,
                             bestBidSize: null,
-                            volume24h: data.quoteVolume && data.lastPrice ? +(+data.quoteVolume * +data.lastPrice).toFixed(2) : null,
+                            volume24h: data.quoteVolume && lastPrice ? +(+data.quoteVolume * lastPrice).toFixed(2) : null,
+                            openInterest,
                         },
                     };
                 });

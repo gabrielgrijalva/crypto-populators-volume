@@ -84,6 +84,7 @@ class KrakenFutures extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: ticker.volumeQuote != null ? +(+ticker.volumeQuote).toFixed(2) : null,
+                        openInterest: ticker.openInterest != null ? (symbol.startsWith('PF_') ? +(+ticker.openInterest * +ticker.last).toFixed(2) : +(+ticker.openInterest).toFixed(2)) : null,
                     }
                 };
             }
@@ -116,6 +117,7 @@ class KrakenFutures extends BaseExchange {
                             bestAskSize: null,
                             bestBidSize: null,
                             volume24h: ticker.volumeQuote != null ? +(+ticker.volumeQuote).toFixed(2) : null,
+                            openInterest: ticker.openInterest != null ? (ticker.symbol.startsWith('PF_') ? +(+ticker.openInterest * +ticker.last).toFixed(2) : +(+ticker.openInterest).toFixed(2)) : null,
                         },
                     };
                 });

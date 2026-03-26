@@ -95,6 +95,7 @@ class Deribit extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: +(+response.result.stats.volume_usd).toFixed(2),
+                        openInterest: response.result.open_interest ? +(+response.result.open_interest).toFixed(2) : null,
                     }
                 };
             }
@@ -134,6 +135,7 @@ class Deribit extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: +(+item.volume_usd).toFixed(2),
+                        openInterest: item.open_interest ? +(+item.open_interest).toFixed(2) : null,
                     },
                 }));
             }

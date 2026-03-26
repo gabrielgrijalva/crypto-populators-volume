@@ -57,14 +57,16 @@ class BinanceUSDMFutures extends BaseExchange {
     // Market data functions
 
     async fetchTicker(symbol, instrument) {
-        const tickerResponse = await this.publicRequest('fapi/v1/ticker/24hr', {
-            symbol,
-        })
-        const bookTickerResponse = await this.publicRequest('fapi/v1/ticker/bookTicker', {
-            symbol,
-        })
+        const [tickerResponse, bookTickerResponse, oiResponse] = await Promise.all([
+            this.publicRequest('fapi/v1/ticker/24hr', { symbol }),
+            this.publicRequest('fapi/v1/ticker/bookTicker', { symbol }),
+            this.publicRequest('fapi/v1/openInterest', { symbol }).catch(() => null),
+        ]);
         if (tickerResponse?.lastPrice && bookTickerResponse?.bidPrice && bookTickerResponse?.askPrice) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
+            const openInterest = oiResponse?.openInterest && tickerResponse?.lastPrice
+                ? +(+oiResponse.openInterest * +tickerResponse.lastPrice).toFixed(2)
+                : null;
             return {
                 symbol,
                 ticker: {
@@ -78,6 +80,7 @@ class BinanceUSDMFutures extends BaseExchange {
                     bestAskSize: +bookTickerResponse.askQty,
                     bestBidSize: +bookTickerResponse.bidQty,
                     volume24h: +(+tickerResponse.quoteVolume).toFixed(2),
+                    openInterest,
                 }
             }
         }
@@ -87,14 +90,23 @@ class BinanceUSDMFutures extends BaseExchange {
     // Batch market data functions
 
     async fetchAllTickers(instrument) {
-        const tickerResponse = await this.publicRequest('fapi/v1/ticker/24hr', {
-        })
-        const bookTickerResponse = await this.publicRequest('fapi/v1/ticker/bookTicker', {
-        })
+        const [tickerResponse, bookTickerResponse] = await Promise.all([
+            this.publicRequest('fapi/v1/ticker/24hr', {}),
+            this.publicRequest('fapi/v1/ticker/bookTicker', {}),
+        ]);
 
         if (tickerResponse?.length && bookTickerResponse?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
-            return tickerResponse.map(res => {
+            const oiResults = await Promise.allSettled(
+                tickerResponse.map(res =>
+                    this.publicRequest('fapi/v1/openInterest', { symbol: res.symbol })
+                )
+            );
+            return tickerResponse.map((res, i) => {
+                const oiResponse = oiResults[i]?.status === 'fulfilled' ? oiResults[i].value : null;
+                const openInterest = oiResponse?.openInterest && res.lastPrice
+                    ? +(+oiResponse.openInterest * +res.lastPrice).toFixed(2)
+                    : null;
                 return {
                     symbol: res.symbol,
                     ticker: {
@@ -108,6 +120,7 @@ class BinanceUSDMFutures extends BaseExchange {
                         bestAskSize: +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol)?.askQty ? +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol).askQty : null,
                         bestBidSize: +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol)?.bidQty ? +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol).bidQty : null,
                         volume24h: +(+res.quoteVolume).toFixed(2),
+                        openInterest,
                     },
                 }
             })
