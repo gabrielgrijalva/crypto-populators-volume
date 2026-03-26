@@ -56,7 +56,7 @@ class HuobiCoinSwaps extends BaseExchange {
                     bestBidPrice: response.tick.bid ?  +response.tick.bid[0] : null,
                     bestAskSize: response.tick.ask ?  +response.tick.ask[1] : null,
                     bestBidSize: response.tick.bid ?  +response.tick.bid[1] : null,
-                    volume24h: +(+response.tick.vol).toFixed(2),
+                    volume24h: +(+response.tick.trade_turnover).toFixed(2),
                 }
             }
         }
@@ -83,7 +83,7 @@ class HuobiCoinSwaps extends BaseExchange {
                         bestBidPrice: res.bid ? +res.bid[0] : null,
                         bestAskSize: res.ask ? +res.ask[1] : null,
                         bestBidSize: res.bid ? +res.bid[1] : null,
-                        volume24h: +(+res.vol).toFixed(2),
+                        volume24h: +(+res.trade_turnover).toFixed(2),
                     },
                 }
             })

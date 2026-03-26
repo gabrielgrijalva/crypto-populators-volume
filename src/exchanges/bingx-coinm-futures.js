@@ -69,7 +69,7 @@ class BingXCoinMFutures extends BaseExchange {
                         bestBidPrice: null,
                         bestAskSize: null,
                         bestBidSize: null,
-                        volume24h: data.volume ? +(+data.volume).toFixed(2) : null,
+                        volume24h: data.volume && data.lastPrice ? +(+data.volume * +data.lastPrice).toFixed(2) : null,
                     }
                 };
             }
@@ -104,7 +104,7 @@ class BingXCoinMFutures extends BaseExchange {
                             bestBidPrice: null,
                             bestAskSize: null,
                             bestBidSize: null,
-                            volume24h: data.volume ? +(+data.volume).toFixed(2) : null,
+                            volume24h: data.volume && data.lastPrice ? +(+data.volume * +data.lastPrice).toFixed(2) : null,
                         },
                     };
                 });

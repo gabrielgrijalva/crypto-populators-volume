@@ -58,7 +58,7 @@ class PhemexContract extends BaseExchange {
                     bestBidPrice: +(response.result.bidEp / this.priceScale).toFixed(8),
                     bestAskSize: null,
                     bestBidSize: null,
-                    volume24h: +(response.result.volume).toFixed(2),
+                    volume24h: +(response.result.turnoverEv / this.ratioScale).toFixed(2),
                 }
             }
         }
@@ -84,7 +84,7 @@ class PhemexContract extends BaseExchange {
                         bestBidPrice: +(res.bidEp / this.priceScale).toFixed(8),
                         bestAskSize: null,
                         bestBidSize: null,
-                        volume24h: +(res.volume).toFixed(2),
+                        volume24h: +(res.turnoverEv / this.ratioScale).toFixed(2),
                     },
                 }
             })

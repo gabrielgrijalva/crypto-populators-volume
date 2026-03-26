@@ -82,15 +82,18 @@ class KuCoinLinear extends BaseExchange {
 
     async fetchTicker(symbol, instrument) {
         try {
-            const [tickersResponse, orderbookResponse] = await Promise.all([
+            const [contracts, tickersResponse] = await Promise.all([
+                this._getContracts(),
                 this.publicRequest('api/v1/allTickers', {}),
-                this.publicRequest('api/v1/level2/depth20', { symbol }),
             ]);
 
             const ticker = tickersResponse?.data?.find(t => t.symbol === symbol);
             if (!ticker) {
                 return null;
             }
+
+            const contract = contracts.find(c => c.symbol === symbol);
+            const turnover = contract?.turnoverOf24h;
 
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
@@ -105,7 +108,7 @@ class KuCoinLinear extends BaseExchange {
                     bestBidPrice: +ticker.bestBidPrice,
                     bestAskSize: +ticker.bestAskSize,
                     bestBidSize: +ticker.bestBidSize,
-                    volume24h: null, // Need separate API call for volume
+                    volume24h: turnover != null ? +(+turnover).toFixed(2) : null,
                 }
             };
         } catch (error) {
@@ -131,21 +134,25 @@ class KuCoinLinear extends BaseExchange {
                 const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
                 return tickersResponse.data
                     .filter(ticker => linearSymbols.has(ticker.symbol))
-                    .map(ticker => ({
-                        symbol: ticker.symbol,
-                        ticker: {
-                            timestamp,
-                            open: null,
-                            high: null,
-                            low: null,
-                            close: +ticker.price,
-                            bestAskPrice: +ticker.bestAskPrice,
-                            bestBidPrice: +ticker.bestBidPrice,
-                            bestAskSize: +ticker.bestAskSize,
-                            bestBidSize: +ticker.bestBidSize,
-                            volume24h: null,
-                        },
-                    }));
+                    .map(ticker => {
+                        const contract = contracts.find(c => c.symbol === ticker.symbol);
+                        const turnover = contract?.turnoverOf24h;
+                        return {
+                            symbol: ticker.symbol,
+                            ticker: {
+                                timestamp,
+                                open: null,
+                                high: null,
+                                low: null,
+                                close: +ticker.price,
+                                bestAskPrice: +ticker.bestAskPrice,
+                                bestBidPrice: +ticker.bestBidPrice,
+                                bestAskSize: +ticker.bestAskSize,
+                                bestBidSize: +ticker.bestBidSize,
+                                volume24h: turnover != null ? +(+turnover).toFixed(2) : null,
+                            },
+                        };
+                    });
             }
             return null;
         } catch (error) {

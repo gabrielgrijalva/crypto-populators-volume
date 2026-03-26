@@ -77,7 +77,7 @@ class BinanceCoinMFutures extends BaseExchange {
                     bestBidPrice: +bookTickerResponse[0].bidPrice,
                     bestAskSize: +bookTickerResponse[0].askQty,
                     bestBidSize: +bookTickerResponse[0].bidQty,
-                    volume24h: +(+tickerResponse[0].volume).toFixed(2),
+                    volume24h: +(+tickerResponse[0].baseVolume * +tickerResponse[0].lastPrice).toFixed(2),
                 }
             }
         }
@@ -107,7 +107,7 @@ class BinanceCoinMFutures extends BaseExchange {
                         bestBidPrice: +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol)?.bidPrice ? +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol).bidPrice : null,
                         bestAskSize: +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol)?.askQty ? +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol).askQty : null,
                         bestBidSize: +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol)?.bidQty ? +bookTickerResponse.find(bookTicker => bookTicker.symbol === res.symbol).bidQty : null,
-                        volume24h: +(+res.volume).toFixed(2),
+                        volume24h: +(+res.baseVolume * +res.lastPrice).toFixed(2),
                     },
                 }
             })
