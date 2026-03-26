@@ -60,7 +60,7 @@ class GateIO extends BaseExchange {
                     bestAskSize: null,
                     bestBidSize: null,
                     volume24h: +response[0].volume_24h_quote,
-                    openInterest: response[0].total_size != null ? +(+response[0].total_size * +response[0].quanto_multiplier * +response[0].last).toFixed(2) : null,
+                    openInterest: response[0].total_size != null ? (+response[0].quanto_multiplier > 0 ? +(+response[0].total_size * +response[0].quanto_multiplier * +response[0].last).toFixed(2) : +(+response[0].total_size).toFixed(2)) : null,
                 }
             }
         }
@@ -88,7 +88,7 @@ class GateIO extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: +res.volume_24h_quote,
-                        openInterest: res.total_size != null ? +(+res.total_size * +res.quanto_multiplier * +res.last).toFixed(2) : null,
+                        openInterest: res.total_size != null ? (+res.quanto_multiplier > 0 ? +(+res.total_size * +res.quanto_multiplier * +res.last).toFixed(2) : +(+res.total_size).toFixed(2)) : null,
                     },
                 }
             })
