@@ -55,21 +55,13 @@ class BitgetFutures extends BaseExchange {
     // Market data functions
 
     async fetchTicker(symbol, instrument) {
-        const [response, oiResponse] = await Promise.all([
-            this.publicRequest('api/v2/mix/market/ticker', {
-                symbol: symbol.toUpperCase(),
-                productType: instrument.toUpperCase()
-            }),
-            this.publicRequest('api/v2/mix/market/open-interest', {
-                symbol: symbol.toUpperCase(),
-                productType: instrument.toUpperCase()
-            }).catch(() => null)
-        ]);
+        const response = await this.publicRequest('api/v2/mix/market/ticker', {
+            symbol: symbol.toUpperCase(),
+            productType: instrument.toUpperCase()
+        });
         if (response?.msg === 'success') {
             console.log(response.data[0])
             const lastPrice = +response.data[0].lastPr;
-            const oiSize = oiResponse?.data?.openInterestList?.[0]?.size;
-            const openInterest = oiSize && lastPrice ? +(+oiSize * lastPrice).toFixed(2) : null;
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
                 symbol,
@@ -84,7 +76,6 @@ class BitgetFutures extends BaseExchange {
                     bestAskSize: +response.data[0].askSz,
                     bestBidSize: +response.data[0].bidSz,
                     volume24h: +(+response.data[0].quoteVolume).toFixed(2),
-                    openInterest,
                 }
             }
         }
@@ -101,21 +92,8 @@ class BitgetFutures extends BaseExchange {
         if (response?.msg === 'success' && response?.data?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
 
-            // Fetch OI for each symbol in parallel
-            const oiResults = await Promise.allSettled(
-                response.data.map(res =>
-                    this.publicRequest('api/v2/mix/market/open-interest', {
-                        symbol: res.symbol.toUpperCase(),
-                        productType: instrument.toUpperCase()
-                    }).catch(() => null)
-                )
-            );
-
-            return response.data.map((res, i) => {
+            return response.data.map((res) => {
                 const lastPrice = +res.lastPr;
-                const oiRes = oiResults[i]?.status === 'fulfilled' ? oiResults[i].value : null;
-                const oiSize = oiRes?.data?.openInterestList?.[0]?.size;
-                const openInterest = oiSize && lastPrice ? +(+oiSize * lastPrice).toFixed(2) : null;
                 return {
                     symbol: res.symbol,
                     ticker: {
@@ -129,7 +107,6 @@ class BitgetFutures extends BaseExchange {
                         bestAskSize: +res.askSz,
                         bestBidSize: +res.bidSz,
                         volume24h: +(+res.quoteVolume).toFixed(2),
-                        openInterest,
                     },
                 }
             })

@@ -16,29 +16,6 @@ class OKX extends BaseExchange {
             fetchTicker: true,
             fetchAllTickers: true,
         }
-        this._oiCache = null;
-        this._oiCacheTime = 0;
-        this._oiCacheTTL = 60000; // 1 minute cache
-    }
-
-    async _getOpenInterestCache() {
-        const now = Date.now();
-        if (this._oiCache && (now - this._oiCacheTime) < this._oiCacheTTL) {
-            return this._oiCache;
-        }
-        try {
-            const response = await this.publicRequest('api/v5/public/open-interest', { instType: 'SWAP' });
-            if (response?.data?.length) {
-                this._oiCache = {};
-                for (const item of response.data) {
-                    this._oiCache[item.instId] = +item.oiUsd;
-                }
-                this._oiCacheTime = now;
-            }
-        } catch (error) {
-            console.error('Error fetching open interest from OKX:', error);
-        }
-        return this._oiCache || {};
     }
 
     // Exchange info functions
@@ -84,8 +61,6 @@ class OKX extends BaseExchange {
             instId: symbol
         });
         if (response?.data?.length) {
-            const oiCache = await this._getOpenInterestCache();
-            const oiUsd = oiCache[symbol];
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
                 symbol,
@@ -100,7 +75,6 @@ class OKX extends BaseExchange {
                     bestAskSize: +response.data[0].askSz,
                     bestBidSize: +response.data[0].bidSz,
                     volume24h: +(+response.data[0].volCcy24h * +response.data[0].last).toFixed(2),
-                    openInterest: oiUsd != null ? +(oiUsd).toFixed(2) : null,
                 }
             }
         }
@@ -110,16 +84,12 @@ class OKX extends BaseExchange {
     // Batch market data functions
 
     async fetchAllTickers(instrument) {
-        const [response, oiCache] = await Promise.all([
-            this.publicRequest('api/v5/market/tickers', {
-                instType: instrument.toUpperCase(), // SPOT / SWAP / FUTURES / OPTION
-            }),
-            this._getOpenInterestCache(),
-        ]);
+        const response = await this.publicRequest('api/v5/market/tickers', {
+            instType: instrument.toUpperCase(), // SPOT / SWAP / FUTURES / OPTION
+        });
         if (response?.data?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return response.data.map(res => {
-                const oiUsd = oiCache[res.instId];
                 return {
                     symbol: res.instId,
                     ticker: {
@@ -133,7 +103,6 @@ class OKX extends BaseExchange {
                         bestAskSize: +res.askSz,
                         bestBidSize: +res.bidSz,
                         volume24h: +(+res.volCcy24h * +res.last).toFixed(2),
-                        openInterest: oiUsd != null ? +(oiUsd).toFixed(2) : null,
                     },
                 }
             })

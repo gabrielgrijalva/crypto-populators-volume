@@ -80,7 +80,6 @@ class Bybit extends BaseExchange {
             const ticker = response.result.list[0];
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             const volume24h = instrument == 'inverse' ? +(+ticker.volume24h).toFixed(2) : +(+ticker.turnover24h).toFixed(2);
-            const openInterest = instrument == 'inverse' ? +(+ticker.openInterest).toFixed(2) : +(+ticker.openInterestValue).toFixed(2);
             return {
                 symbol,
                 ticker: {
@@ -94,7 +93,6 @@ class Bybit extends BaseExchange {
                     bestAskSize: +ticker.ask1Size,
                     bestBidSize: +ticker.bid1Size,
                     volume24h,
-                    openInterest,
                 }
             }
         }
@@ -111,7 +109,6 @@ class Bybit extends BaseExchange {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return response.result.list.map(res => {
                 const volume24h = instrument == 'inverse' ? +(+res.volume24h).toFixed(2) : +(+res.turnover24h).toFixed(2);
-                const openInterest = instrument == 'inverse' ? +(+res.openInterest).toFixed(2) : +(+res.openInterestValue).toFixed(2);
                 return {
                     symbol: res.symbol,
                     ticker: {
@@ -125,7 +122,6 @@ class Bybit extends BaseExchange {
                         bestAskSize: +res.ask1Size,
                         bestBidSize: +res.bid1Size,
                         volume24h,
-                        openInterest,
                     },
                 }
             })

@@ -50,19 +50,12 @@ class BingXUSDMFutures extends BaseExchange {
     async fetchTicker(symbol, instrument) {
         try {
             const timestamp = Date.now();
-            const [response, oiResponse] = await Promise.all([
-                axios.get(`${this.url}/openApi/swap/v2/quote/ticker`, {
-                    params: { symbol, timestamp }
-                }),
-                axios.get(`${this.url}/openApi/swap/v2/quote/openInterest`, {
-                    params: { symbol, timestamp }
-                }).catch(() => null)
-            ]);
+            const response = await axios.get(`${this.url}/openApi/swap/v2/quote/ticker`, {
+                params: { symbol, timestamp }
+            });
 
             if (response?.data?.data) {
                 const data = response.data.data;
-                const oiValue = oiResponse?.data?.data?.openInterest;
-                const openInterest = oiValue ? +(+oiValue).toFixed(2) : null;
                 const ts = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
                 return {
                     symbol,
@@ -77,7 +70,6 @@ class BingXUSDMFutures extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: data.quoteVolume ? +(+data.quoteVolume).toFixed(2) : null,
-                        openInterest,
                     }
                 };
             }
@@ -100,19 +92,7 @@ class BingXUSDMFutures extends BaseExchange {
             if (response?.data?.data?.length) {
                 const ts = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
 
-                // Fetch OI for each symbol in parallel
-                const oiResults = await Promise.allSettled(
-                    response.data.data.map(data =>
-                        axios.get(`${this.url}/openApi/swap/v2/quote/openInterest`, {
-                            params: { symbol: data.symbol, timestamp: Date.now() }
-                        }).catch(() => null)
-                    )
-                );
-
-                return response.data.data.map((data, i) => {
-                    const oiRes = oiResults[i]?.status === 'fulfilled' ? oiResults[i].value : null;
-                    const oiValue = oiRes?.data?.data?.openInterest;
-                    const openInterest = oiValue ? +(+oiValue).toFixed(2) : null;
+                return response.data.data.map((data) => {
                     return {
                         symbol: data.symbol,
                         ticker: {
@@ -126,7 +106,6 @@ class BingXUSDMFutures extends BaseExchange {
                             bestAskSize: null,
                             bestBidSize: null,
                             volume24h: data.quoteVolume ? +(+data.quoteVolume).toFixed(2) : null,
-                            openInterest,
                         },
                     };
                 });

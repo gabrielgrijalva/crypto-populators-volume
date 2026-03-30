@@ -77,7 +77,6 @@ class Bitmex extends BaseExchange {
                     bestAskSize: null,
                     bestBidSize: null,
                     volume24h: +(response[0].foreignNotional24h).toFixed(2),
-                    openInterest: response[0].openInterest ? +(+response[0].openInterest).toFixed(2) : null,
                 }
             };
         }
@@ -108,7 +107,6 @@ class Bitmex extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: +(res.foreignNotional24h).toFixed(2),
-                        openInterest: res.openInterest ? +(+res.openInterest).toFixed(2) : null,
                     }
                 }
             })

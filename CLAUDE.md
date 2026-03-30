@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-A Node.js service that continuously fetches and stores **24h trading volume** and **open interest** data from 18 cryptocurrency derivatives exchanges into a MySQL database. It runs on scheduled cron intervals (default every 5 minutes), with a daily maintenance cycle at 00:00 UTC.
+A Node.js service that continuously fetches and stores **24h trading volume** data from 18 cryptocurrency derivatives exchanges into a MySQL database. It runs on scheduled cron intervals (default every 5 minutes), with a daily maintenance cycle at 00:00 UTC.
 
 **Runtime**: Node.js v22+ | **Entry point**: `src/main.js` | **Database**: MySQL (`exchanges` database)
 
@@ -29,7 +29,7 @@ src/
 ## Data Flow
 
 1. **Startup**: `generateDynamicSettings()` calls each exchange's `fetchSymbols()` to discover all tradeable contracts and writes `src/pairs.json`
-2. **Cron cycle** (every N minutes): For each exchange + instrument pair, calls `fetchAllTickers()` (bulk) or loops `fetchTicker()` (per-symbol), then inserts volume and OI into MySQL
+2. **Cron cycle** (every N minutes): For each exchange + instrument pair, calls `fetchAllTickers()` (bulk) or loops `fetchTicker()` (per-symbol), then inserts volume into MySQL
 3. **Daily maintenance** (00:00 UTC): Refetches symbols, clears health trackers, deletes data older than retention period (default 60 days), creates any missing tables
 
 ## Exchange Module Pattern
@@ -51,15 +51,14 @@ Each exchange declares supported methods via `this.has = { fetchSymbols, fetchTi
 
 **Standardized ticker response**: All exchanges must normalize to USD notional values:
 ```js
-{ symbol, ticker: { timestamp, volume24h, openInterest, close, ... } }
+{ symbol, ticker: { timestamp, volume24h, close, ... } }
 ```
 
 ## Database Schema
 
-Two table types per symbol, named `{prefix}_{type}_{symbol}_{metric}`:
+One table per symbol, named `{prefix}_{instrumentCode}_volume_24h_{symbol}`:
 
-- **Volume**: `{exchange}_{instrumentCode}_{symbol}_volume_24h` — columns: `timestamp DATETIME PK`, `volume_24h DECIMAL(30,2)`
-- **Open Interest**: `{exchange}_{instrumentCode}_{symbol}_open_interest` — columns: `timestamp DATETIME PK`, `open_interest DECIMAL(30,2)`
+- **Volume**: `{exchange}_{instrumentCode}_volume_24h_{symbol}` — columns: `timestamp DATETIME PK`, `volume_24h DECIMAL(30,2)`
 
 Instrument type codes: `f` = futures, `p` = perpetual, `pq` = perpetual_quanto, `s` = spot. Max table name length: 64 chars.
 
@@ -87,7 +86,7 @@ Round-robin rotation across 4 proxy IPs per hostname. Uses `localAddress` bindin
 
 ## Important Conventions
 
-- **All volume and OI values are normalized to USD notional** before storage
+- **All volume values are normalized to USD notional** before storage
 - **Timestamps use UTC** throughout (`moment.utc()`)
 - **Logging format**: `YYYY-MM-DD HH:mm:ss.SSS [crypto-populators-volume] - message`
 - **Asset name sanitization**: XBT/xbt → BTC, strips underscores/hyphens/spaces, removes large numeric suffixes (100000, 1000000)
@@ -198,20 +197,7 @@ Log files:
 - **Connection pool**: 10 connections (app-level), max_connections: 151 (server-level)
 - **InnoDB buffer pool**: 128 MB
 - **Total database size**: ~290 MB
-- **Total tables**: 11,576 (volume + open interest tables across all exchanges)
-
-**Tables per exchange**:
-
-| Exchange | Tables | Exchange | Tables |
-|----------|--------|----------|--------|
-| Phemex | 1,544 | KuCoin | 1,148 |
-| BingX | 1,410 | Bitget | 1,130 |
-| Bybit | 1,370 | Kraken | 664 |
-| Gate.io | 1,316 | OKX | 602 |
-| Binance | 1,262 | CoinEx | 466 |
-| | | Huobi | 446 |
-| | | BitMEX | 132 |
-| | | Deribit | 86 |
+- **Total tables**: ~5,788 (volume tables across all exchanges; OI tables moved to `crypto-populators-open-interest`)
 
 **Data retention**: 60 days (configurable via `volume_days_to_keep` in `settings.js`). Old rows are purged daily at 00:00 UTC.
 

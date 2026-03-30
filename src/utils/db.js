@@ -38,15 +38,8 @@ async function createTable(tableName, tableType = 'volume_24h') {
                     volume_24h DECIMAL(30,2) NOT NULL
                 )
             `;
-        } else if (tableType === 'open_interest') {
-            query = `
-                CREATE TABLE ${tableName} (
-                    timestamp DATETIME PRIMARY KEY,
-                    open_interest DECIMAL(30,2) NOT NULL
-                )
-            `;
         } else {
-            throw new Error(`Unrecognized table type: ${tableType}. Only 'volume_24h' and 'open_interest' are supported.`);
+            throw new Error(`Unrecognized table type: ${tableType}. Only 'volume_24h' is supported.`);
         }
 
         await pool.query(query);
@@ -89,38 +82,6 @@ async function insertVolumeData(tableName, volumeData) {
     }
 }
 
-async function insertOpenInterestData(tableName, oiData) {
-
-    logWithTimestamp(`Table name: ${tableName}`)
-    console.log('Inserting open interest data:', oiData);
-
-    try {
-        logWithTimestamp(`${tableName}: Inserting ${oiData.length} rows.`)
-
-        const query = `
-            INSERT INTO ${tableName} (timestamp, open_interest) VALUES ?
-            ON DUPLICATE KEY UPDATE
-                open_interest = VALUES(open_interest)
-        `;
-
-        const values = oiData.map(data => [
-            data.timestamp,
-            data.openInterest,
-        ]);
-
-        if (values.length > 0) {
-            console.log('Inserting values:', values);
-        }
-
-        await pool.query(query, [values]);
-
-    } catch (error) {
-        const errorMessage = `Error inserting data into table ${tableName}: ${error.message}`;
-        handleError(errorMessage, true);
-        throw error;
-    }
-}
-
 async function deleteOldData(daysToKeep, callback) {
     try {
         // Calculate the cutoff date
@@ -132,13 +93,7 @@ async function deleteOldData(daysToKeep, callback) {
             [settings.database.database]
         );
 
-        // Fetch all table names matching open_interest pattern
-        const [oiTables] = await pool.query(
-            `SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = ? AND TABLE_NAME LIKE '%_open_interest_%'`,
-            [settings.database.database]
-        );
-
-        const tables = [...volumeTables, ...oiTables];
+        const tables = [...volumeTables];
 
         for (const table of tables) {
             const tableName = table.TABLE_NAME;
@@ -176,6 +131,5 @@ module.exports = {
     tableExists,
     createTable,
     insertVolumeData,
-    insertOpenInterestData,
     deleteOldData
 };

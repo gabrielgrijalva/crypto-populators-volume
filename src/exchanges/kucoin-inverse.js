@@ -94,7 +94,6 @@ class KuCoinInverse extends BaseExchange {
 
             const contract = contracts.find(c => c.symbol === symbol);
             const turnover = contract?.volumeOf24h;
-            const oi = contract?.openInterest != null ? +(+contract.openInterest).toFixed(2) : null;
 
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
@@ -110,7 +109,6 @@ class KuCoinInverse extends BaseExchange {
                     bestAskSize: +ticker.bestAskSize,
                     bestBidSize: +ticker.bestBidSize,
                     volume24h: turnover != null ? +(+turnover).toFixed(2) : null,
-                    openInterest: oi,
                 }
             };
         } catch (error) {
@@ -139,7 +137,6 @@ class KuCoinInverse extends BaseExchange {
                     .map(ticker => {
                         const contract = contracts.find(c => c.symbol === ticker.symbol);
                         const turnover = contract?.volumeOf24h;
-                        const oi = contract?.openInterest != null ? +(+contract.openInterest).toFixed(2) : null;
                         return {
                             symbol: ticker.symbol,
                             ticker: {
@@ -153,7 +150,6 @@ class KuCoinInverse extends BaseExchange {
                                 bestAskSize: +ticker.bestAskSize,
                                 bestBidSize: +ticker.bestBidSize,
                                 volume24h: turnover != null ? +(+turnover).toFixed(2) : null,
-                                openInterest: oi,
                             },
                         };
                     });

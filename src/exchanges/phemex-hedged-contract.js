@@ -58,7 +58,6 @@ class PhemexHedgedContract extends BaseExchange {
                     bestAskSize: null,
                     bestBidSize: null,
                     volume24h: +(+response.result.turnoverRv).toFixed(2),
-                    openInterest: response.result.openInterestRv != null ? +(+response.result.openInterestRv * +response.result.lastRp).toFixed(2) : null,
                 }
             }
         }
@@ -85,7 +84,6 @@ class PhemexHedgedContract extends BaseExchange {
                         bestAskSize: null,
                         bestBidSize: null,
                         volume24h: +(+res.turnoverRv).toFixed(2),
-                        openInterest: res.openInterestRv != null ? +(+res.openInterestRv * +res.lastRp).toFixed(2) : null,
                     },
                 }
             })

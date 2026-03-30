@@ -15,29 +15,6 @@ class HuobiUSDTSwaps extends BaseExchange {
             fetchTicker: true,
             fetchAllTickers: true,
         }
-        this._oiCache = null;
-        this._oiCacheTime = 0;
-        this._oiCacheTTL = 60000; // 1 minute cache
-    }
-
-    async _getOpenInterestCache() {
-        const now = Date.now();
-        if (this._oiCache && (now - this._oiCacheTime) < this._oiCacheTTL) {
-            return this._oiCache;
-        }
-        try {
-            const response = await this.publicRequest('linear-swap-api/v1/swap_open_interest', {});
-            if (response?.status === 'ok' && response?.data?.length) {
-                this._oiCache = {};
-                for (const item of response.data) {
-                    this._oiCache[item.contract_code] = +item.value;
-                }
-                this._oiCacheTime = now;
-            }
-        } catch (error) {
-            console.error('Error fetching open interest from Huobi USDT Swaps:', error);
-        }
-        return this._oiCache || {};
     }
 
     // Exchange info functions
@@ -65,8 +42,6 @@ class HuobiUSDTSwaps extends BaseExchange {
             contract_code: symbol
         })
         if (response?.status === 'ok') {
-            const oiCache = await this._getOpenInterestCache();
-            const oiUsd = oiCache[symbol];
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return {
                 symbol,
@@ -81,7 +56,6 @@ class HuobiUSDTSwaps extends BaseExchange {
                     bestAskSize: response.tick.ask ? +response.tick.ask[1] : null,
                     bestBidSize: response.tick.bid ? +response.tick.bid[1] : null,
                     volume24h: +(+response.tick.trade_turnover).toFixed(2),
-                    openInterest: oiUsd != null ? +(oiUsd).toFixed(2) : null,
                 }
             }
         }
@@ -91,14 +65,10 @@ class HuobiUSDTSwaps extends BaseExchange {
     // Batch market data functions
 
     async fetchAllTickers(instrument) {
-        const [response, oiCache] = await Promise.all([
-            this.publicRequest('v2/linear-swap-ex/market/detail/batch_merged', {}),
-            this._getOpenInterestCache(),
-        ]);
+        const response = await this.publicRequest('v2/linear-swap-ex/market/detail/batch_merged', {});
         if (response?.status === 'ok' && response?.ticks?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return response.ticks.map(res => {
-                const oiUsd = oiCache[res.contract_code];
                 return {
                     symbol: res.contract_code,
                     ticker: {
@@ -112,7 +82,6 @@ class HuobiUSDTSwaps extends BaseExchange {
                         bestAskSize: res.ask ? +res.ask[1] : null,
                         bestBidSize: res.bid ? +res.bid[1] : null,
                         volume24h: res.vol != null ? +(+res.vol).toFixed(2) : null,
-                        openInterest: oiUsd != null ? +(oiUsd).toFixed(2) : null,
                     },
                 }
             })
