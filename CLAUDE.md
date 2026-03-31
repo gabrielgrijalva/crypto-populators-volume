@@ -204,8 +204,10 @@ Log files:
 ### Deployment
 
 - **Git remote**: `git@github.com:gabrielgrijalva/crypto-populators-volume.git`
-- **Deploy path**: `/home/ubuntu/crypto-populators-volume`
-- **Deployment process**: Manual — pull changes, `npm install` if deps changed, `pm2 restart main`
+- **Deploy path**: `/home/ubuntu/crypto-populators-volume` (a full git clone tracking `origin/main`)
+- **Git credentials**: SSH key configured on the server for `github.com` access (required for `git pull`)
+- **Deployment process**: Manual — `git pull` to fetch latest changes, `npm install` if deps changed, `pm2 restart main`
+- **Requirement**: The production directory must remain a git-tracked repository. All code updates are delivered via `git pull` from origin — never by copying files directly
 
 ### Resource Usage (typical)
 
