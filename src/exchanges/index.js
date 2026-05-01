@@ -13,6 +13,7 @@ const binance_spot = require('./binance-spot');
 const bitget_futures = require('./bitget-futures');
 const bingx_usdm_futures = require('./bingx-usdm-futures');
 const bingx_coinm_futures = require('./bingx-coinm-futures');
+const bingx_spot = require('./bingx-spot');
 const deribit = require('./deribit');
 const kraken_futures = require('./kraken-futures');
 const kucoin_linear = require('./kucoin-linear');
@@ -34,6 +35,7 @@ module.exports = {
     bitget_futures,
     bingx_usdm_futures,
     bingx_coinm_futures,
+    bingx_spot,
     deribit,
     kraken_futures,
     kucoin_linear,
