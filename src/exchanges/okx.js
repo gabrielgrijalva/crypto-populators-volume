@@ -61,7 +61,13 @@ class OKX extends BaseExchange {
             instId: symbol
         });
         if (response?.data?.length) {
+            const data = response.data[0];
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
+            // For SPOT, volCcy24h is already in quote currency (USD-notional for USDT/USDC pairs).
+            // For SWAP/FUTURES, volCcy24h is in base currency, so multiply by last to get USD-notional.
+            const volume24h = data.instType === 'SPOT'
+                ? +(+data.volCcy24h).toFixed(2)
+                : +(+data.volCcy24h * +data.last).toFixed(2);
             return {
                 symbol,
                 ticker: {
@@ -69,12 +75,12 @@ class OKX extends BaseExchange {
                     open: null,
                     high: null,
                     low: null,
-                    close: +response.data[0].last,
-                    bestAskPrice: +response.data[0].askPx,
-                    bestBidPrice: +response.data[0].bidPx,
-                    bestAskSize: +response.data[0].askSz,
-                    bestBidSize: +response.data[0].bidSz,
-                    volume24h: +(+response.data[0].volCcy24h * +response.data[0].last).toFixed(2),
+                    close: +data.last,
+                    bestAskPrice: +data.askPx,
+                    bestBidPrice: +data.bidPx,
+                    bestAskSize: +data.askSz,
+                    bestBidSize: +data.bidSz,
+                    volume24h,
                 }
             }
         }
@@ -90,6 +96,11 @@ class OKX extends BaseExchange {
         if (response?.data?.length) {
             const timestamp = moment().utc().subtract(1, 'minutes').startOf('minute').format('YYYY-MM-DD HH:mm:ss');
             return response.data.map(res => {
+                // For SPOT, volCcy24h is already in quote currency (USD-notional for USDT/USDC pairs).
+                // For SWAP/FUTURES, volCcy24h is in base currency, so multiply by last to get USD-notional.
+                const volume24h = res.instType === 'SPOT'
+                    ? +(+res.volCcy24h).toFixed(2)
+                    : +(+res.volCcy24h * +res.last).toFixed(2);
                 return {
                     symbol: res.instId,
                     ticker: {
@@ -102,7 +113,7 @@ class OKX extends BaseExchange {
                         bestBidPrice: +res.bidPx,
                         bestAskSize: +res.askSz,
                         bestBidSize: +res.bidSz,
-                        volume24h: +(+res.volCcy24h * +res.last).toFixed(2),
+                        volume24h,
                     },
                 }
             })
