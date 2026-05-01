@@ -3,7 +3,7 @@ const BaseExchange = require("./base-exchange")
 
 const moment = require("moment");
 
-const USD_QUOTE_ASSETS = new Set(['USDT', 'USDC', 'USD', 'BUSD', 'FDUSD', 'TUSD']);
+const USD_QUOTE_ASSETS = new Set(['USDT']);
 
 class HuobiSpot extends BaseExchange {
     constructor(ips = [], globalRateLimiter) {

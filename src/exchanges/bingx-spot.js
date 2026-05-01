@@ -3,7 +3,7 @@ const BaseExchange = require("./base-exchange")
 
 const moment = require("moment");
 
-const USD_QUOTE_ASSETS = new Set(['USDT', 'USDC', 'BUSD', 'FDUSD', 'TUSD', 'USD']);
+const USD_QUOTE_ASSETS = new Set(['USDT']);
 
 class BingXSpot extends BaseExchange {
     constructor(ips = [], globalRateLimiter) {

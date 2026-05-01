@@ -3,7 +3,7 @@ const BaseExchange = require("./base-exchange")
 
 const moment = require("moment");
 
-const USD_QUOTE_ASSETS = new Set(['USDT', 'USDC', 'USD', 'BUSD', 'FDUSD', 'TUSD']);
+const USD_QUOTE_ASSETS = new Set(['USDT']);
 const DEFAULT_SCALES = { priceScale: 8, valueScale: 8 };
 
 class PhemexSpot extends BaseExchange {
@@ -38,7 +38,7 @@ class PhemexSpot extends BaseExchange {
                 };
                 return {
                     symbol: r.symbol,
-                    table_symbol: r.displaySymbol.replace(' / ', ''),
+                    table_symbol: r.displaySymbol.replace(/[^A-Za-z0-9]/g, ''),
                     type: 'spot',
                     asset: sanitizeAssetName(r.baseCurrency),
                 };

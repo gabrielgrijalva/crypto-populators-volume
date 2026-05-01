@@ -24,7 +24,7 @@ class Bitmex extends BaseExchange {
         const response = await this.publicRequest('api/v1/instrument/active');
         if (response?.length) {
             return response
-            .filter(res => res.state === 'Open' && res.typ === instrument)
+            .filter(res => res.state === 'Open' && res.typ === instrument && (res.typ !== 'IFXXXP' || res.quoteCurrency === 'USDT'))
             .map(res => {
                 let adjustedType;
                 switch (res.typ) {

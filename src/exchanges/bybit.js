@@ -26,7 +26,7 @@ class Bybit extends BaseExchange {
         })
         if (response?.result?.list?.length) {
             return response.result.list
-            .filter(res => res.status == 'Trading')
+            .filter(res => res.status == 'Trading' && (type !== 'spot' || res.quoteCoin === 'USDT'))
             .map(res => {
                 let adjustedType;
                 switch(type) {

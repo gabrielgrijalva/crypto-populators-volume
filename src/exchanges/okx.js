@@ -26,7 +26,7 @@ class OKX extends BaseExchange {
         })
         if (response?.data?.length) {
             return response.data
-            .filter(res => res.state === 'live')
+            .filter(res => res.state === 'live' && (res.instType !== 'SPOT' || res.quoteCcy === 'USDT'))
             .map(res => {
                 let adjustedType;
                 switch(res.instType) {

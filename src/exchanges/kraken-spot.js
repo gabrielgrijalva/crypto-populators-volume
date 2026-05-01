@@ -3,7 +3,7 @@ const BaseExchange = require("./base-exchange")
 
 const moment = require("moment");
 
-const USD_QUOTE_ASSETS = new Set(['USD', 'USDT', 'USDC', 'BUSD', 'FDUSD', 'TUSD']);
+const USD_QUOTE_ASSETS = new Set(['USDT']);
 const TICKER_BATCH_SIZE = 100;
 
 class KrakenSpot extends BaseExchange {

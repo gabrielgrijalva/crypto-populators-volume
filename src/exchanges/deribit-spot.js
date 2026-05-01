@@ -3,7 +3,7 @@ const BaseExchange = require("./base-exchange")
 
 const moment = require("moment");
 
-const USD_QUOTE_ASSETS = new Set(['USDC', 'USDT', 'USD']);
+const USD_QUOTE_ASSETS = new Set(['USDT']);
 
 class DeribitSpot extends BaseExchange {
     constructor(ips = [], globalRateLimiter) {
