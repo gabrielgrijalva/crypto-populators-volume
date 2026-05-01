@@ -6,6 +6,7 @@ const phemex_contract = require('./phemex-contract');
 const phemex_hedged_contract = require('./phemex-hedged-contract');
 const okx = require('./okx');
 const gate_perpetuals = require('./gate-perpetuals');
+const gate_spot = require('./gate-spot');
 const huobi_coin_swaps = require('./huobi-coin-swaps');
 const huobi_usdt_swaps = require('./huobi-usdt-swaps');
 const binance_usdm_futures = require('./binance-usdm-futures');
@@ -31,6 +32,7 @@ module.exports = {
     phemex_hedged_contract,
     okx,
     gate_perpetuals,
+    gate_spot,
     huobi_coin_swaps,
     huobi_usdt_swaps,
     binance_usdm_futures,
