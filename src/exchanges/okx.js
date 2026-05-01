@@ -4,6 +4,8 @@ const BaseExchange = require("./base-exchange")
 const axios = require("axios");
 const moment = require("moment");
 
+const USD_QUOTE_ASSETS = new Set(['USDT', 'USDC', 'USD', 'BUSD', 'FDUSD', 'TUSD']);
+
 class OKX extends BaseExchange {
 
     constructor(ips = [], globalRateLimiter) {
@@ -26,7 +28,7 @@ class OKX extends BaseExchange {
         })
         if (response?.data?.length) {
             return response.data
-            .filter(res => res.state === 'live' && (res.instType !== 'SPOT' || res.quoteCcy === 'USDT'))
+            .filter(res => res.state === 'live' && (res.instType !== 'SPOT' || USD_QUOTE_ASSETS.has(res.quoteCcy)))
             .map(res => {
                 let adjustedType;
                 switch(res.instType) {

@@ -4,6 +4,8 @@ const BaseExchange = require("./base-exchange")
 const axios = require("axios");
 const moment = require("moment");
 
+const USD_QUOTE_ASSETS = new Set(['USDT', 'USDC', 'USD', 'BUSD', 'FDUSD', 'TUSD']);
+
 class Bybit extends BaseExchange {
     constructor(ips = [], globalRateLimiter) {
         super(ips, globalRateLimiter);
@@ -26,7 +28,7 @@ class Bybit extends BaseExchange {
         })
         if (response?.result?.list?.length) {
             return response.result.list
-            .filter(res => res.status == 'Trading' && (type !== 'spot' || res.quoteCoin === 'USDT'))
+            .filter(res => res.status == 'Trading' && (type !== 'spot' || USD_QUOTE_ASSETS.has(res.quoteCoin)))
             .map(res => {
                 let adjustedType;
                 switch(type) {

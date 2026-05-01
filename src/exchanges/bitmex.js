@@ -4,6 +4,8 @@ const BaseExchange = require("./base-exchange")
 const axios = require("axios");
 const moment = require("moment");
 
+const USD_QUOTE_ASSETS = new Set(['USDT', 'USDC', 'USD', 'BUSD', 'FDUSD', 'TUSD']);
+
 class Bitmex extends BaseExchange {
 
     constructor(ips = [], globalRateLimiter) {
@@ -24,7 +26,7 @@ class Bitmex extends BaseExchange {
         const response = await this.publicRequest('api/v1/instrument/active');
         if (response?.length) {
             return response
-            .filter(res => res.state === 'Open' && res.typ === instrument && (res.typ !== 'IFXXXP' || res.quoteCurrency === 'USDT'))
+            .filter(res => res.state === 'Open' && res.typ === instrument && (res.typ !== 'IFXXXP' || USD_QUOTE_ASSETS.has(res.quoteCurrency)))
             .map(res => {
                 let adjustedType;
                 switch (res.typ) {
