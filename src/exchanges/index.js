@@ -11,6 +11,7 @@ const binance_usdm_futures = require('./binance-usdm-futures');
 const binance_coinm_futures = require('./binance-coinm-futures');
 const binance_spot = require('./binance-spot');
 const bitget_futures = require('./bitget-futures');
+const bitget_spot = require('./bitget-spot');
 const bingx_usdm_futures = require('./bingx-usdm-futures');
 const bingx_coinm_futures = require('./bingx-coinm-futures');
 const bingx_spot = require('./bingx-spot');
@@ -33,6 +34,7 @@ module.exports = {
     binance_coinm_futures,
     binance_spot,
     bitget_futures,
+    bitget_spot,
     bingx_usdm_futures,
     bingx_coinm_futures,
     bingx_spot,
