@@ -21,6 +21,7 @@ const bingx_spot = require('./bingx-spot');
 const deribit = require('./deribit');
 const deribit_spot = require('./deribit-spot');
 const kraken_futures = require('./kraken-futures');
+const kraken_spot = require('./kraken-spot');
 const kucoin_linear = require('./kucoin-linear');
 const kucoin_inverse = require('./kucoin-inverse');
 
@@ -48,6 +49,7 @@ module.exports = {
     deribit,
     deribit_spot,
     kraken_futures,
+    kraken_spot,
     kucoin_linear,
     kucoin_inverse,
 };
