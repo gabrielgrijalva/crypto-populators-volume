@@ -3,3 +3,4 @@ src/test.js
 settings.js
 src/pairs.json
 .DS_Store
+tmp/
