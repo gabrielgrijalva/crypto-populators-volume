@@ -9,6 +9,7 @@ const gate_perpetuals = require('./gate-perpetuals');
 const gate_spot = require('./gate-spot');
 const huobi_coin_swaps = require('./huobi-coin-swaps');
 const huobi_usdt_swaps = require('./huobi-usdt-swaps');
+const huobi_spot = require('./huobi-spot');
 const binance_usdm_futures = require('./binance-usdm-futures');
 const binance_coinm_futures = require('./binance-coinm-futures');
 const binance_spot = require('./binance-spot');
@@ -35,6 +36,7 @@ module.exports = {
     gate_spot,
     huobi_coin_swaps,
     huobi_usdt_swaps,
+    huobi_spot,
     binance_usdm_futures,
     binance_coinm_futures,
     binance_spot,
