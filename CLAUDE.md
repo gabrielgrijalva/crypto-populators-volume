@@ -4,7 +4,7 @@
 
 A Node.js service that continuously fetches and stores **24h trading volume** data from 18 cryptocurrency derivatives exchanges into a MySQL database. It runs on scheduled cron intervals (default every 5 minutes), with a daily maintenance cycle at 00:00 UTC.
 
-**Runtime**: Node.js v22+ | **Entry point**: `src/main.js` | **Database**: MySQL (`exchanges` database)
+**Runtime**: Node.js v18+ | **Entry point**: `src/main.js` | **Database**: MySQL (`exchanges` database)
 
 ## Architecture
 
