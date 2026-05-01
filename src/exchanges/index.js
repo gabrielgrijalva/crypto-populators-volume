@@ -9,6 +9,7 @@ const huobi_coin_swaps = require('./huobi-coin-swaps');
 const huobi_usdt_swaps = require('./huobi-usdt-swaps');
 const binance_usdm_futures = require('./binance-usdm-futures');
 const binance_coinm_futures = require('./binance-coinm-futures');
+const binance_spot = require('./binance-spot');
 const bitget_futures = require('./bitget-futures');
 const bingx_usdm_futures = require('./bingx-usdm-futures');
 const bingx_coinm_futures = require('./bingx-coinm-futures');
@@ -29,6 +30,7 @@ module.exports = {
     huobi_usdt_swaps,
     binance_usdm_futures,
     binance_coinm_futures,
+    binance_spot,
     bitget_futures,
     bingx_usdm_futures,
     bingx_coinm_futures,
