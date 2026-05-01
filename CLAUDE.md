@@ -133,7 +133,7 @@ Round-robin rotation across 4 proxy IPs per hostname. Uses `localAddress` bindin
 
 - **Cloud**: AWS EC2
 - **Instance**: AMD EPYC 7R13 — 4 vCPUs, 7.6 GB RAM
-- **Storage**: 500 GB NVMe SSD (`nvme0n1`), ~16 GB used (4%)
+- **Storage**: 500 GB NVMe SSD (`nvme0n1`)
 - **OS**: Ubuntu 24.04.4 LTS (Noble Numbat), kernel 6.17
 - **Private IP**: `172.31.41.117` (primary)
 - **SSH access**: `ssh ubuntu@crypto-populators-volume` (hostname in local `/etc/hosts`)
@@ -182,11 +182,10 @@ pm2 save                # Save current process list (for boot recovery)
 - **Rotation schedule**: Daily at 00:00 UTC
 - **Compression**: Disabled
 - **Log location**: `~/.pm2/logs/`
-- **Current disk usage**: ~6.2 GB total across all log files
 
 Log files:
-- `main-out.log` — stdout (very high volume, ~1.5 GB/day due to verbose ticker logging)
-- `main-error.log` — stderr (~2.5 MB/day, exchange API errors and retries)
+- `main-out.log` — stdout (high volume due to verbose ticker logging)
+- `main-error.log` — stderr (exchange API errors and retries)
 
 ### MySQL Database
 
@@ -196,8 +195,7 @@ Log files:
 - **User**: `ardaga`
 - **Connection pool**: 10 connections (app-level), max_connections: 151 (server-level)
 - **InnoDB buffer pool**: 128 MB
-- **Total database size**: ~290 MB
-- **Total tables**: ~5,788 (volume tables across all exchanges; OI tables moved to `crypto-populators-open-interest`)
+- **Tables**: one per symbol per instrument (OI tables were moved to `crypto-populators-open-interest`)
 
 **Data retention**: 60 days (configurable via `volume_days_to_keep` in `settings.js`). Old rows are purged daily at 00:00 UTC.
 
@@ -208,14 +206,6 @@ Log files:
 - **Git credentials**: SSH key configured on the server for `github.com` access (required for `git pull`)
 - **Deployment process**: Manual — `git pull` to fetch latest changes, `npm install` if deps changed, `pm2 restart main`
 - **Requirement**: The production directory must remain a git-tracked repository. All code updates are delivered via `git pull` from origin — never by copying files directly
-
-### Resource Usage (typical)
-
-- **Memory**: ~270 MB (PM2 process) + ~92 MB (pm2-logrotate)
-- **Heap**: ~52 MB used / ~58 MB allocated (90.6% utilization)
-- **CPU**: <1% idle, spikes during fetch cycles
-- **Event loop latency**: p95 ~1.6 ms (healthy)
-- **Restarts since deploy**: 7 (over 4 days)
 
 ## Common Tasks
 
