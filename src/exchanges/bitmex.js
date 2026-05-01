@@ -44,6 +44,11 @@ class Bitmex extends BaseExchange {
                 // Replace 'XBT' with 'BTC' for the table_symbol
                 let adjustedTableSymbol = res.symbol.replace('XBT', 'BTC');
 
+                // IFXXXP (spot) symbols are underscore-separated (e.g., XRP_USDT); strip underscores to match project-wide convention
+                if (res.typ === 'IFXXXP') {
+                    adjustedTableSymbol = adjustedTableSymbol.replace(/_/g, '');
+                }
+
                 return {
                     symbol: res.symbol,
                     table_symbol: adjustedTableSymbol,
