@@ -4,6 +4,7 @@ const coinex_futures = require('./coinex-futures');
 const coinex_spot = require('./coinex-spot');
 const phemex_contract = require('./phemex-contract');
 const phemex_hedged_contract = require('./phemex-hedged-contract');
+const phemex_spot = require('./phemex-spot');
 const okx = require('./okx');
 const gate_perpetuals = require('./gate-perpetuals');
 const gate_spot = require('./gate-spot');
@@ -33,6 +34,7 @@ module.exports = {
     coinex_spot,
     phemex_contract,
     phemex_hedged_contract,
+    phemex_spot,
     okx,
     gate_perpetuals,
     gate_spot,
