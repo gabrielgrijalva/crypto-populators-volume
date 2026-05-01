@@ -207,18 +207,15 @@ async function ensureTablesExist() {
             console.log(`Ensuring tables exist for exchange: ${exchange.api_name}`);
             for (const instrumentType in exchange.instruments) {
                 for (const instrument of exchange.instruments[instrumentType]) {
-                    // Skip spot contracts - volume project is derivatives only
-                    if (instrument.type !== 'spot') {
-                        const volumeTableName = getTableName(
-                            exchange.api_name,
-                            exchange.table_prefix,
-                            instrument.type,
-                            'volume_24h',
-                            instrument.symbol,
-                            instrument.table_symbol
-                        );
-                        await ensureTableExists(volumeTableName, 'volume_24h');
-                    }
+                    const volumeTableName = getTableName(
+                        exchange.api_name,
+                        exchange.table_prefix,
+                        instrument.type,
+                        'volume_24h',
+                        instrument.symbol,
+                        instrument.table_symbol
+                    );
+                    await ensureTableExists(volumeTableName, 'volume_24h');
                 }
             }
         }
@@ -356,12 +353,9 @@ async function initializeExchangeProcesses(exchangeSettings) {
                 timeframes: data.timeframes
             }));
 
-            // Filter out spot contracts - volume project is derivatives only
-            const volumeSymbols = symbols.filter(s =>
-                s.type !== 'spot'
-            );
+            const volumeSymbols = symbols;
 
-            // Only set up cron job if there are symbols that support volume fetching
+            // Only set up cron job if there are symbols
             if (volumeSymbols.length > 0) {
                 const lockKey = `${exchangeSettings.api_name}_${instrument}`;
                 const intervalMinutes = settings.volume_interval_minutes || 5;
