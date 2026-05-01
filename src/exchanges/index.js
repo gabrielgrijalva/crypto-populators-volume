@@ -24,6 +24,7 @@ const kraken_futures = require('./kraken-futures');
 const kraken_spot = require('./kraken-spot');
 const kucoin_linear = require('./kucoin-linear');
 const kucoin_inverse = require('./kucoin-inverse');
+const kucoin_spot = require('./kucoin-spot');
 
 module.exports = {
     bitmex,
@@ -52,4 +53,5 @@ module.exports = {
     kraken_spot,
     kucoin_linear,
     kucoin_inverse,
+    kucoin_spot,
 };
