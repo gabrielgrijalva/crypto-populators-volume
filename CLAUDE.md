@@ -104,9 +104,9 @@ Round-robin rotation across 4 proxy IPs per hostname. Uses `localAddress` bindin
 | Gate.io | `gate-perpetuals.js` | btc, usdt (perpetual/quanto) |
 | Huobi USDT | `huobi-usdt-swaps.js` | swap |
 | Huobi Coin | `huobi-coin-swaps.js` | swap |
-| Phemex Standard | `phemex-contract.js` | perpetual/futures |
-| Phemex Hedged | `phemex-hedged-contract.js` | perpetual/futures |
-| BitMEX | `bitmex.js` | FFWCSX, FFCCSX |
+| Phemex Standard | `phemex-contract.js` | perpetual |
+| Phemex Hedged | `phemex-hedged-contract.js` | perpetual |
+| BitMEX | `bitmex.js` | FFWCSX |
 | CoinEx | `coinex-futures.js` | perpetual |
 | Deribit | `deribit.js` | perpetual, future |
 | Kraken Futures | `kraken-futures.js` | perpetual, future |
