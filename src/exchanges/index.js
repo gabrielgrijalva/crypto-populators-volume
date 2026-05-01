@@ -1,6 +1,7 @@
 const bitmex = require('./bitmex');
 const bybit = require('./bybit');
 const coinex_futures = require('./coinex-futures');
+const coinex_spot = require('./coinex-spot');
 const phemex_contract = require('./phemex-contract');
 const phemex_hedged_contract = require('./phemex-hedged-contract');
 const okx = require('./okx');
@@ -24,6 +25,7 @@ module.exports = {
     bitmex,
     bybit,
     coinex_futures,
+    coinex_spot,
     phemex_contract,
     phemex_hedged_contract,
     okx,
